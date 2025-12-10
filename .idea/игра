@@ -1,0 +1,31 @@
+import random
+
+# Алфавит (русские строчные буквы)
+letters = 'бвгджзклмнпрстфхцчшщ'
+
+print("Угадай букву!")
+print("Я загадал одну букву русского алфавита. Попробуй угадать за 8 попыток.")
+
+# Загадываем букву
+secret_letter = random.choice(letters)
+attempts = 8
+
+# Игровой цикл
+while attempts > 0:
+    guess = input(f"\nОставлось попыток: {attempts}. Твоя буква: ").lower()
+
+    if len(guess) != 1 or guess not in letters:
+        print("Введи одну русскую букву!")
+        continue
+
+    if guess == secret_letter:
+        print(f"✅ Ура! Ты угадал: это буква '{secret_letter}'.")
+        break
+    else:
+        attempts -= 1
+        if attempts > 0:
+            print("Неверно! Попробуй ещё.")
+        else:
+            print(f"❌ Попытки закончились! Загаданная буква: '{secret_letter}'.")
+
+print("Спасибо за игру!")
