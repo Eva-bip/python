@@ -1,0 +1,190 @@
+import datetime
+
+class ATM:
+    def __init__(self):
+        self.balance = 10000
+        self.pin = "0000"
+        self.attempts = 3
+        self.history = []
+        self.op_num = 1
+
+    def check_pin(self):
+        while self.attempts > 0:
+            pin = input("Введите PIN: ")
+            if pin == self.pin:
+                print("✓ Доступ разрешён")
+                return True
+            self.attempts -= 1
+            print(f"Неверный PIN. Осталось попыток: {self.attempts}")
+        print("Карта заблокирована!")
+        return False
+
+    def show_balance(self):
+        print(f"\nВаш баланс: {self.balance} руб.")
+
+    def withdraw(self):
+        try:
+            amount = int(input("Сумма для снятия: "))
+            if amount > 5000:
+                print("Ошибка: максимум 5000 руб. за операцию.")
+                return
+            if amount > self.balance:
+                print("Ошибка: недостаточно средств.")
+                return
+            if amount <= 0:
+                print("Ошибка: сумма должна быть положительной.")
+                return
+
+            print(f"\nСнятие: {amount} руб.")
+            print(f"Баланс после: {self.balance - amount} руб.")
+            if input("Подтвердить? (да/нет): ") == "да":
+                self.balance -= amount
+                self.history.append({
+                    "номер": self.op_num,
+                    "тип": "снятие",
+                    "сумма": amount,
+                    "баланс": self.balance,
+                    "время": datetime.datetime.now().strftime("%H:%M:%S")
+                })
+                self.op_num += 1
+                print(f!✓ Операция выполнена. Возьмите: {amount} руб.")
+                print(f"Текущий баланс: {self.balance} руб.")
+        except ValueError:
+            print("Ошибка: введите число.")
+
+    def deposit(self):
+        try:
+            amount = int(input("Сумма пополнения: "))
+            if amount <= 0:
+                print("Ошибка: сумма должна быть положительной.")
+                return
+            self.balance += amount
+            self.history.append({
+                "номер": self.op_num,
+                "тип": "пополнение",
+                "сумма": amount,
+                "баланс": self.balance,
+                "время": datetime.datetime.now().strftime("%H:%M:%S")
+            })
+            self.op_num += 1
+            print(f!✓ Пополнение выполнено. Баланс: {self.balance} руб.")
+        except ValueError:
+            print("Ошибка: введите число.")
+
+    def transfer(self):
+        try:
+            amount = int(input("Сумма перевода: "))
+            if amount <= 0:
+                print("Ошибка: сумма должна быть положительной.")
+                return
+            commission = amount * 0.01
+            total = amount + commission
+
+            if total > self.balance:
+                print("Ошибка: недостаточно средств (с комиссией).")
+                return
+
+            print(f"\nПеревод: {amount} руб.")
+            print(f"Комиссия (1%): {commission:.2f} руб.")
+            print(f"Итого: {total:.2f} руб.")
+            print(f"Баланс после: {self.balance - total:.2f} руб.")
+            if input("Подтвердить? (да/нет): ") == "да":
+                self.balance -= total
+                self.history.append({
+                    "номер": self.op_num,
+                    "тип": "перевод",
+                    "сумма": amount,
+                    "комиссия": commission,
+                    "баланс": self.balance,
+                    "время": datetime.datetime.now().strftime("%H:%M:%S")
+                })
+                self.op_num += 1
+                print(f!✓ Перевод выполнен. Баланс: {self.balance:.2f} руб.")
+        except ValueError:
+            print("Ошибка: введите число.")
+
+    def show_history(self):
+        if not self.history:
+            print("История операций пуста.")
+            return
+        print("\nИстория операций:")
+        for op in self.history:
+            if op["тип"] == "перевод":
+                print(f"{op['номер']}. {op['тип']} {op['сумма']} руб. "
+                      f"(комиссия: {op['комиссия']:.2f} руб., "
+                      f"баланс: {op['баланс']:.2f} руб.) [{op['время']}]")
+            else:
+                print(f"{op['номер']}. {op['тип']} {op['сумма']} руб. "
+                      f"(баланс: {op['баланс']} руб.) [{op['время']}]")
+
+    def set_pin(self):
+        new_pin = input("Новый PIN (4 цифры): ")
+        if len(new_pin) == 4 and new_pin.isdigit():
+            self.pin = new_pin
+            print("✓ PIN установлен.")
+        else:
+            print("Ошибка: PIN должен быть из 4 цифр.")
+
+    def change_pin(self):
+        if input("Текущий PIN: ") != self.pin:
+            print("Ошибка: неверный PIN.")
+            return
+        new_pin = input("Новый PIN (4 цифры): ")
+        if len(new_pin) == 4 and new_pin.isdigit():
+            self.pin = new_pin
+            print("✓ PIN изменён.")
+        else:
+            print("Ошибка: PIN должен быть из 4 цифр.")
+
+    def undo_last(self):
+        if not self.history:
+            print("Нет операций для отмены.")
+            return
+        last = self.history.pop()
+        if last["тип"] == "снятие":
+            self.balance += last["сумма"]
+            print(f!✓ Отменено снятие {last['сумма']} руб.")
+        elif last["тип"] == "пополнение":
+            self.balance -= last["сумма"]
+            print(f!✓ Отменено пополнение {last['сумма']} руб.")
+        elif last["тип"] == "перевод":
+            total = last["сумма"] + last["комиссия"]
+            self.balance += total
+            print(f!✓ Отменён перевод {total:.2f} руб. (с комиссией).")
+        print(f"Баланс: {self.balance} руб.")
+
+    def run(self):
+        print("=== БАНКОМАТ ===")
+        if not self.check_pin():
+            return
+
+        while True:
+            print("\nВыберите операцию:")
+            print("1. Баланс")
+            print("2. Снять")
+            print("3. Пополнить")
+            print("4. Перевести")
+            print("5. История")
+            print("6. Установить PIN")
+            print("7. Сменить PIN")
+            print("8. Отменить последнюю")
+            print("9. Выход")
+
+            choice = input("Выбор: ")
+            if choice == "1": self.show_balance()
+            elif choice == "2": self.withdraw()
+            elif choice == "3": self.deposit()
+            elif choice == "4": self.transfer()
+            elif choice == "5": self.show_history()
+            elif choice == "6": self.set_pin()
+            elif choice == "7": self.change_pin()
+            elif choice == "8": self.undo_last()
+            elif choice == "9": 
+                print("До свидания!")
+                break
+            else: print("Неверный выбор.")
+
+# Запуск
+if __name__ == "__main__":
+    atm = ATM()
+    atm.run()
