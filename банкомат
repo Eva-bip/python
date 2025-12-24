@@ -1,0 +1,134 @@
+class CinemaBooking:
+    def __init__(self):
+        # Зал 8 рядов × 10 мест, 0 — свободно, 1 — занято
+        self.hall = [[0] * 10 for _ in range(8)]
+        # Цены по рядам
+        self.prices = {1: 500, 2: 500, 3: 500, 4: 300, 5: 300, 6: 300, 7: 200, 8: 200}
+        self.total_revenue = 0
+
+    def show_hall(self):
+        """Отображение схемы зала"""
+        print("\n      1  2  3  4  5  6  7  8  9  10")
+        for i, row in enumerate(self.hall, 1):
+            line = f"Ряд {i} "
+            for seat in row:
+                line += "[X]" if seat == 1 else "[0]"
+            price = self.prices[i]
+            line += f! {price}₽"
+            print(line)
+
+    def get_stats(self):
+        """Вывод статистики"""
+        total = 80
+        occupied = sum(sum(row) for row in self.hall)
+        free = total - occupied
+        fill_rate = (occupied / total) * 100
+
+        # Самый популярный ряд (с наибольшим числом занятых мест)
+        popular_row = max(enumerate(self.hall, 1), key=lambda x: sum(x[1]))[0]
+
+        print(f"\nСтатистика:")
+        print(f"- Свободно: {free} мест")
+        print(f"- Занято: {occupied} мест")
+        print(f"- Заполненность: {fill_rate:.2f}%")
+        print(f"- Самый популярный ряд: {popular_row}")
+        print(f"- Выручка: {self.total_revenue} руб.")
+
+    def book_seat(self):
+        """Бронирование места"""
+        try:
+            row = int(input("Ряд: "))
+            seat = int(input("Место: "))
+            if not (1 <= row <= 8) or not (1 <= seat <= 10):
+                print("Ошибка: неверный номер ряда или места.")
+                return
+            if self.hall[row-1][seat-1] == 1:
+                print("Место уже занято!")
+                return
+
+            price = self.prices[row]
+            print(f"Цена: {price} руб.")
+            if input("Подтвердить бронирование? (да/нет): ").lower() == "да":
+                self.hall[row-1][seat-1] = 1
+                self.total_revenue += price
+                print("✓ Место забронировано!")
+        except ValueError:
+            print("Ошибка: введите числа.")
+
+    def cancel_booking(self):
+        """Отмена бронирования"""
+        try:
+            row = int(input("Ряд: "))
+            seat = int(input("Место: "))
+            if not (1 <= row <= 8) or not (1 <= seat <= 10):
+                print("Ошибка: неверный номер ряда или места.")
+                return
+            if self.hall[row-1][seat-1] == 0:
+                print("Место свободно (нет брони).")
+                return
+
+            price = self.prices[row]
+            self.hall[row-1][seat-1] = 0
+            self.total_revenue -= price
+            print("✓ Бронь отменена.")
+        except ValueError:
+            print("Ошибка: введите числа.")
+
+    def book_multiple(self):
+        """Бронирование нескольких мест"""
+        print("Введите места для бронирования (ряд место), каждое с новой строки.")
+        print("Для завершения введите 'готово'.")
+        while True:
+            inp = input("> ").strip()
+            if inp.lower() == "готово":
+                break
+            try:
+                row, seat = map(int, inp.split())
+                if not (1 <= row <= 8) or not (1 <= seat <= 10):
+                    print("Ошибка: неверный номер ряда или места.")
+                    continue
+                if self.hall[row-1][seat-1] == 1:
+                    print(f"Место {row} {seat} уже занято!")
+                    continue
+                price = self.prices[row]
+                self.hall[row-1][seat-1] = 1
+                self.total_revenue += price
+                print(f!✓ Место {row} {seat} забронировано ({price} руб.)")
+            except ValueError:
+                print("Ошибка: введите два числа через пробел.")
+
+    def run(self):
+        print("=== КИНОТЕАТР «ПРЕМЬЕР» ===")
+        print("Фильм: «Интерстеллар»")
+        print("Время: 18:00")
+
+        while True:
+            self.show_hall()
+            self.get_stats()
+            print("\nМеню:")
+            print("1. Забронировать место")
+            print("2. Отменить бронь")
+            print("3. Забронировать несколько мест")
+            print("4. Показать статистику")
+            print("5. Выход")
+
+            choice = input("Выбор: ")
+            if choice == "1":
+                self.book_seat()
+            elif choice == "2":
+                self.cancel_booking()
+            elif choice == "3":
+                self.book_multiple()
+            elif choice == "4":
+                self.get_stats()
+            elif choice == "5":
+                print("До свидания!")
+                break
+            else:
+                print("Неверный выбор. Попробуйте снова.")
+
+
+# Запуск программы
+if __name__ == "__main__":
+    cinema = CinemaBooking()
+    cinema.run()
